@@ -84,16 +84,12 @@ pub extern "C" fn websurferx_sync_init() -> bool {
 pub extern "C" fn websurferx_sync_get_auth_url() -> *mut c_char {
     let mut guard = FXA_STATE.lock().unwrap();
     if let Some(account) = guard.as_mut() {
-        if account.get_auth_state() == FxaRustAuthState::Disconnected {
-            clear_saved_state();
-            *account = FirefoxAccount::new(make_config());
-        }
+        clear_saved_state();
+        *account = FirefoxAccount::new(make_config());
 
         let scopes = ["https://identity.mozilla.com/apps/oldsync", "profile"];
         match account.begin_oauth_flow(&scopes, "websurferx_toolbar", "websurferx_login") {
-            Ok(url) => {
-                return CString::new(url).unwrap().into_raw();
-            },
+            Ok(url) => return CString::new(url).unwrap().into_raw(),
             Err(e) => println!("Rust FFI: Failed to begin OAuth flow: {:?}", e),
         }
     }
