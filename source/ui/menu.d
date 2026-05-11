@@ -193,7 +193,14 @@ class MenuPopover
         Button syncBtn = new Button();
         syncBtn.setIconName("view-refresh-symbolic");
         syncBtn.setTooltipText("Sync Bookmarks");
-        syncBtn.connectClicked(delegate void(Button b) { startFxaLogin(); });
+        syncBtn.connectClicked(delegate void(Button b) { 
+            import sync.ffi : websurferx_sync_is_logged_in, websurferx_sync_bookmarks;
+            if (websurferx_sync_is_logged_in()) {
+                websurferx_sync_bookmarks();
+            } else {
+                startFxaLogin(); 
+            }
+        });
         headerBox.append(syncBtn);
 
         bookmarksPage.append(headerBox);
@@ -527,17 +534,12 @@ class MenuPopover
     {
         import sync.ffi;
         import std.string : fromStringz;
-        import std.stdio : writeln;
 
         char* urlCStr = websurferx_sync_get_auth_url();
         if (urlCStr !is null)
         {
             string authUrl = cast(string) fromStringz(urlCStr).dup;
             websurferx_sync_free_string(urlCStr);
-
-            writeln("============= FXA DEBUG =============");
-            writeln("Auth URL: ", authUrl);
-            writeln("=====================================");
 
             parentWindow.newTab(authUrl);
             popover.popdown();

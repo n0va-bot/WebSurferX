@@ -501,13 +501,9 @@ class BrowserTab
 
     void interceptOauthRedirect(string uri)
     {
-        import std.stdio : writeln;
         import std.string;
         import sync.ffi;
         import std.uri : decode;
-
-        writeln("============= FXA INTERCEPT =============");
-        writeln("Intercepted URI: ", uri);
 
         string code = "";
         string state = "";
@@ -532,16 +528,11 @@ class BrowserTab
             }
         }
 
-        writeln("Code: ", code);
-        writeln("State: ", state);
-        writeln("=========================================");
-
         if (code.length > 0 && state.length > 0)
         {
             import std.string : toStringz;
 
             bool success = websurferx_sync_complete_login(toStringz(code), toStringz(state));
-            writeln("websurferx_sync_complete_login success: ", success);
             if (success)
             {
                 websurferx_sync_bookmarks();
