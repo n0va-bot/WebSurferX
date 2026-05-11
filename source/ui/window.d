@@ -52,7 +52,7 @@ class BrowserWindow : ApplicationWindow
     this(Application app)
     {
         super(app);
-        setTitle("WebSurferY");
+        setTitle("WebSurferX");
         setDefaultSize(core.config.winSize[0], core.config.winSize[1]);
 
         Box mainBox = new Box(Orientation.Vertical, 0);

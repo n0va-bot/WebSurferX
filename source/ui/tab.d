@@ -529,10 +529,10 @@ class BrowserTab
         {
             import std.string : toStringz;
 
-            bool success = websurfery_sync_complete_login(toStringz(code), toStringz(state));
+            bool success = websurferx_sync_complete_login(toStringz(code), toStringz(state));
             if (success)
             {
-                websurfery_sync_bookmarks();
+                websurferx_sync_bookmarks();
             }
         }
 

@@ -17,7 +17,7 @@ string generateStartPage()
         ~ ".suggestions div { padding:8px 12px; font-size:14px; cursor:pointer; color:#e0e0e0; font-family:monospace; }\n"
         ~ ".suggestions div:hover, .suggestions div.selected { background:#222; }\n"
         ~ "</style>\n</head>\n<body>\n<div class=\"page\">\n"
-        ~ "<h1>WebSurferY</h1>\n"
+        ~ "<h1>WebSurferX</h1>\n"
         ~ "<form action=\"https://duckduckgo.com/\" method=\"get\" id=\"sf\" autocomplete=\"off\">\n"
         ~ "<input type=\"text\" name=\"q\" id=\"q\" placeholder=\"Search the web...\" autofocus>\n"
         ~ "<div class=\"suggestions\" id=\"suggestions\"></div>\n"

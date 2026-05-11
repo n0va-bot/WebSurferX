@@ -528,11 +528,11 @@ class MenuPopover
         import sync.ffi;
         import std.string : fromStringz;
 
-        char* urlCStr = websurfery_sync_get_auth_url();
+        char* urlCStr = websurferx_sync_get_auth_url();
         if (urlCStr !is null)
         {
             string authUrl = cast(string) fromStringz(urlCStr).dup;
-            websurfery_sync_free_string(urlCStr);
+            websurferx_sync_free_string(urlCStr);
 
             parentWindow.newTab(authUrl);
             popover.popdown();

@@ -2,11 +2,11 @@ module core.config;
 
 bool surfUserAgent = true;
 string fullUserAgent = "";
-string scriptFile = "~/.surfery/script.js";
-string styleDir = "~/.surfery/styles/";
-string certDir = "~/.surfery/certificates/";
-string cacheDir = "~/.surfery/cache/";
-string cookieFile = "~/.surfery/cookies.txt";
+string scriptFile = "~/.local/share/websurferx/script.js";
+string styleDir = "~/.local/share/websurferx/styles/";
+string certDir = "~/.local/share/websurferx/certificates/";
+string cacheDir = "~/.local/share/websurferx/cache/";
+string cookieFile = "~/.local/share/websurferx/cookies.txt";
 
 int[] winSize = [800, 600];
 

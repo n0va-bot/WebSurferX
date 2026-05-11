@@ -17,7 +17,7 @@ static REDIRECT_URI: &str = "http://127.0.0.1/websurfer-fxa-login";
 
 fn get_sync_state_path() -> Option<std::path::PathBuf> {
     let mut path = dirs::data_local_dir()?;
-    path.push("websurfery");
+    path.push("websurferx");
     std::fs::create_dir_all(&path).ok()?;
     path.push("sync_state.json");
     Some(path)
@@ -49,7 +49,7 @@ fn clear_saved_state() {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn websurfery_sync_init() -> bool {
+pub extern "C" fn websurferx_sync_init() -> bool {
     if INITIALIZED.swap(true, Ordering::SeqCst) {
         return true;
     }
@@ -81,7 +81,7 @@ pub extern "C" fn websurfery_sync_init() -> bool {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn websurfery_sync_get_auth_url() -> *mut c_char {
+pub extern "C" fn websurferx_sync_get_auth_url() -> *mut c_char {
     let mut guard = FXA_STATE.lock().unwrap();
     if let Some(account) = guard.as_mut() {
         if account.get_auth_state() == FxaRustAuthState::Disconnected {
@@ -90,7 +90,7 @@ pub extern "C" fn websurfery_sync_get_auth_url() -> *mut c_char {
         }
 
         let scopes = ["https://identity.mozilla.com/apps/oldsync", "profile"];
-        match account.begin_oauth_flow(&scopes, "websurfery_toolbar", "websurfery_login") {
+        match account.begin_oauth_flow(&scopes, "websurferx_toolbar", "websurferx_login") {
             Ok(url) => {
                 return CString::new(url).unwrap().into_raw();
             },
@@ -101,7 +101,7 @@ pub extern "C" fn websurfery_sync_get_auth_url() -> *mut c_char {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn websurfery_sync_complete_login(code: *const c_char, state: *const c_char) -> bool {
+pub extern "C" fn websurferx_sync_complete_login(code: *const c_char, state: *const c_char) -> bool {
     let mut guard = FXA_STATE.lock().unwrap();
     if let Some(account) = guard.as_mut() {
         unsafe {
@@ -123,7 +123,7 @@ pub extern "C" fn websurfery_sync_complete_login(code: *const c_char, state: *co
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn websurfery_sync_is_logged_in() -> bool {
+pub extern "C" fn websurferx_sync_is_logged_in() -> bool {
     let guard = FXA_STATE.lock().unwrap();
     if let Some(account) = guard.as_ref() {
         return account.get_auth_state() == FxaRustAuthState::Connected;
@@ -132,7 +132,7 @@ pub extern "C" fn websurfery_sync_is_logged_in() -> bool {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn websurfery_sync_bookmarks() -> bool {
+pub extern "C" fn websurferx_sync_bookmarks() -> bool {
     let mut guard = FXA_STATE.lock().unwrap();
     if let Some(account) = guard.as_mut() {
         match account.get_access_token("https://identity.mozilla.com/apps/oldsync", false) {
@@ -147,7 +147,7 @@ pub extern "C" fn websurfery_sync_bookmarks() -> bool {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn websurfery_sync_free_string(s: *mut c_char) {
+pub extern "C" fn websurferx_sync_free_string(s: *mut c_char) {
     unsafe {
         if s.is_null() { return }
         let _ = CString::from_raw(s);

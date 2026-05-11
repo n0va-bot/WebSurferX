@@ -4,7 +4,7 @@
 	],
 	"license": "MIT",
 	"copyright": "Copyright © 2026, N0\\A",
-	"name": "websurfery",
+	"name": "websurferx",
 	"description": "A lightweight web browser in D based on suckless surf.",
 	"dependencies": {
 		"gid:webkit6": "~>0.9.10"

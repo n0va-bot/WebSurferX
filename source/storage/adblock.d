@@ -18,7 +18,7 @@ import glib.global : idleAdd;
 string getAdblockDir()
 {
     string home = environment.get("HOME", "/tmp");
-    string dir = buildPath(home, ".config", "websurfery", "adblock");
+    string dir = buildPath(home, ".config", "websurferx", "adblock");
     if (!exists(dir))
         mkdirRecurse(dir);
     return dir;

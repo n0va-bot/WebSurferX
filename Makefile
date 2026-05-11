@@ -10,14 +10,14 @@ sync_client:
 	@echo "sync_client built successfully."
 
 build: sync_client
-	@echo "Building WebSurferY..."
+	@echo "Building WebSurferX..."
 	dub build
-	@echo "WebSurferY built successfully."
+	@echo "WebSurferX built successfully."
 
 run: build
-	./websurfery
+	./websurferx
 
 clean:
 	@cd sync_client && cargo clean
 	dub clean
-	rm -f websurfery
+	rm -f websurferx

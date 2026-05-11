@@ -7,7 +7,7 @@ import std.process;
 string dataDir()
 {
     string home = environment.get("HOME", "/tmp");
-    string dir = buildPath(home, ".config", "websurfery");
+    string dir = buildPath(home, ".config", "websurferx");
     if (!exists(dir))
         mkdirRecurse(dir);
     return dir;

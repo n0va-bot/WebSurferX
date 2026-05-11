@@ -8,7 +8,7 @@ import ui.window;
 
 int main(string[] args)
 {
-    auto app = new Application("org.websurfery.browser", ApplicationFlags.FlagsNone);
+    auto app = new Application("org.websurferx.browser", ApplicationFlags.FlagsNone);
 
     BrowserWindow win;
 
@@ -18,9 +18,9 @@ int main(string[] args)
 
         loadSettings();
 
-        import sync.ffi : websurfery_sync_init;
+        import sync.ffi : websurferx_sync_init;
 
-        websurfery_sync_init();
+        websurferx_sync_init();
 
         initAdblock(delegate void(bool success) {
             import std.stdio;
