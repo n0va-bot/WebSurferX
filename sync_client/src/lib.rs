@@ -12,8 +12,8 @@ lazy_static! {
 
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
-static CLIENT_ID: &str = "3c49430b43dfaf97"; 
-static REDIRECT_URI: &str = "urn:ietf:wg:oauth:2.0:oob:oauth-redirect-webchannel";
+static CLIENT_ID: &str = "a2270f727f45f648"; 
+static REDIRECT_URI: &str = "https://accounts.firefox.com/oauth/success/a2270f727f45f648";
 
 fn get_sync_state_path() -> Option<std::path::PathBuf> {
     let mut path = dirs::data_local_dir()?;
@@ -90,7 +90,7 @@ pub extern "C" fn websurferx_sync_get_auth_url() -> *mut c_char {
 
     if let Some(account) = guard.as_mut() {
         let scopes = ["https://identity.mozilla.com/apps/oldsync", "profile"];
-        match account.begin_oauth_flow(&scopes, "websurferx_toolbar", "websurferx_login") {
+        match account.begin_oauth_flow(&scopes, "fxa_creds", "") {
             Ok(url) => return CString::new(url).unwrap().into_raw(),
             Err(e) => println!("Rust FFI: Failed to begin OAuth flow: {:?}", e),
         }

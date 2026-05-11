@@ -527,12 +527,17 @@ class MenuPopover
     {
         import sync.ffi;
         import std.string : fromStringz;
+        import std.stdio : writeln;
 
         char* urlCStr = websurferx_sync_get_auth_url();
         if (urlCStr !is null)
         {
             string authUrl = cast(string) fromStringz(urlCStr).dup;
             websurferx_sync_free_string(urlCStr);
+
+            writeln("============= FXA DEBUG =============");
+            writeln("Auth URL: ", authUrl);
+            writeln("=====================================");
 
             parentWindow.newTab(authUrl);
             popover.popdown();
