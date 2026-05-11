@@ -1,0 +1,18 @@
+[package]
+name = "sync_client"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+fxa-client = { git = "https://github.com/mozilla/application-services", branch = "main" }
+sync15 = { git = "https://github.com/mozilla/application-services", branch = "main" }
+nss = { git = "https://github.com/mozilla/application-services", branch = "main" }
+viaduct = { git = "https://github.com/mozilla/application-services", branch = "main" }
+viaduct-hyper = { git = "https://github.com/mozilla/application-services", branch = "main" }
+tokio = { version = "1", features = ["full"] }
+lazy_static = "1.4"
+serde_json = "1.0"
+dirs = "5.0"

@@ -1,0 +1,27 @@
+{
+	"authors": [
+		"N0\\A"
+	],
+	"license": "MIT",
+	"copyright": "Copyright © 2026, N0\\A",
+	"name": "websurfery",
+	"description": "A lightweight web browser in D based on suckless surf.",
+	"dependencies": {
+		"gid:webkit6": "~>0.9.10"
+	},
+	"lflags": [
+		"-L$PACKAGE_DIR/sync_client/target/debug/",
+		"-lsync_client",
+		"-lssl3",
+		"-lsmime3",
+		"-lnss3",
+		"-lnssutil3",
+		"-lplds4",
+		"-lplc4",
+		"-lnspr4",
+		"-lsqlite3",
+		"-lpthread",
+		"-ldl",
+		"-lm"
+	]
+}
