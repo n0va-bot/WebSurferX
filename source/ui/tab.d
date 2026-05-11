@@ -514,13 +514,15 @@ class BrowserTab
             auto pairs = query.split("&");
             foreach (pair; pairs)
             {
-                auto kv = pair.split("=");
-                if (kv.length == 2)
+                long eqIdx = pair.indexOf("=");
+                if (eqIdx != -1)
                 {
-                    if (kv[0] == "code")
-                        code = kv[1];
-                    if (kv[0] == "state")
-                        state = kv[1];
+                    string key = pair[0 .. eqIdx];
+                    string value = pair[eqIdx + 1 .. $];
+                    if (key == "code")
+                        code = value;
+                    if (key == "state")
+                        state = value;
                 }
             }
         }
