@@ -10,3 +10,4 @@ Rust FFI: Successfully decrypted 0 bookmarks
 )
 2. extensions
 3. webapps
+4. other sync
