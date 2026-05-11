@@ -12,8 +12,8 @@ lazy_static! {
 
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
-static CLIENT_ID: &str = "a2270f727f45f648"; 
-static REDIRECT_URI: &str = "http://127.0.0.1/websurfer-fxa-login";
+static CLIENT_ID: &str = "3c49430b43dfaf97"; 
+static REDIRECT_URI: &str = "urn:ietf:wg:oauth:2.0:oob:oauth-redirect-webchannel";
 
 fn get_sync_state_path() -> Option<std::path::PathBuf> {
     let mut path = dirs::data_local_dir()?;

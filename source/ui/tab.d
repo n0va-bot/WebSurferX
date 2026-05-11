@@ -73,6 +73,13 @@ class BrowserTab
         auto ucm = view.getUserContentManager();
         ucm.registerScriptMessageHandler("websurferBridge");
 
+        import webkit.user_script : UserScript;
+        import webkit.types : UserContentInjectedFrames, UserScriptInjectionTime;
+
+        string js = "window.addEventListener('WebChannelMessageToChrome', function(e) { if (e.detail && e.detail.message && e.detail.message.command === 'oauth_code_resolved') { window.webkit.messageHandlers.websurferBridge.postMessage(JSON.stringify({ action: 'fxaWebChannelAuth', code: e.detail.message.data.code, state: e.detail.message.data.state })); } });";
+        auto script = new UserScript(js, UserContentInjectedFrames.TopFrame, UserScriptInjectionTime.Start, null, null);
+        ucm.addScript(script);
+
         import javascriptcore.value : Value;
         import webkit.user_content_manager : UserContentManager;
 
@@ -254,6 +261,23 @@ class BrowserTab
                 }
             }
         }
+        else if (action == "fxaWebChannelAuth")
+        {
+            import std.string : toStringz;
+            import sync.ffi : websurferx_sync_complete_login, websurferx_sync_bookmarks;
+
+            if ("code" in j && "state" in j)
+            {
+                bool success = websurferx_sync_complete_login(toStringz(j["code"].str), toStringz(
+                        j["state"].str));
+                if (success)
+                {
+                    websurferx_sync_bookmarks();
+                }
+                if (onCloseRequested)
+                    onCloseRequested();
+            }
+        }
     }
 
     void applyDarkModeSetting()
@@ -350,11 +374,6 @@ class BrowserTab
 
         string safeUri = failingUri !is null ? failingUri : "unknown";
 
-        import std.algorithm.searching : startsWith;
-
-        if (safeUri.startsWith("http://127.0.0.1/websurfer-fxa-login"))
-            return true;
-
         string code;
         final switch (loadEvent)
         {
@@ -418,15 +437,6 @@ class BrowserTab
                 if (req && req.getUri().length > 0)
                 {
                     string uri = req.getUri();
-
-                    import std.algorithm.searching : startsWith;
-
-                    if (uri.startsWith("http://127.0.0.1/websurfer-fxa-login"))
-                    {
-                        interceptOauthRedirect(uri);
-                        decision.ignore();
-                        return true;
-                    }
 
                     if (action.getMouseButton() == 2 && onNewTabRequested)
                     {
@@ -496,49 +506,5 @@ class BrowserTab
             idx++;
         }
         return false;
-    }
-
-    void interceptOauthRedirect(string uri)
-    {
-        import std.stdio;
-        import std.string;
-        import sync.ffi;
-
-        string code = "";
-        string state = "";
-
-        long qIdx = uri.indexOf("?");
-        if (qIdx != -1)
-        {
-            string query = uri[qIdx + 1 .. $];
-            auto pairs = query.split("&");
-            foreach (pair; pairs)
-            {
-                long eqIdx = pair.indexOf("=");
-                if (eqIdx != -1)
-                {
-                    string key = pair[0 .. eqIdx];
-                    string value = pair[eqIdx + 1 .. $];
-                    if (key == "code")
-                        code = value;
-                    if (key == "state")
-                        state = value;
-                }
-            }
-        }
-
-        if (code.length > 0 && state.length > 0)
-        {
-            import std.string : toStringz;
-
-            bool success = websurferx_sync_complete_login(toStringz(code), toStringz(state));
-            if (success)
-            {
-                websurferx_sync_bookmarks();
-            }
-        }
-
-        if (onCloseRequested)
-            onCloseRequested();
     }
 }
