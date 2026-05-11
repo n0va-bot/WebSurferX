@@ -83,10 +83,12 @@ pub extern "C" fn websurferx_sync_init() -> bool {
 #[unsafe(no_mangle)]
 pub extern "C" fn websurferx_sync_get_auth_url() -> *mut c_char {
     let mut guard = FXA_STATE.lock().unwrap();
-    if let Some(account) = guard.as_mut() {
-        clear_saved_state();
-        *account = FirefoxAccount::new(make_config());
 
+    if guard.is_none() {
+        *guard = Some(FirefoxAccount::new(make_config()));
+    }
+
+    if let Some(account) = guard.as_mut() {
         let scopes = ["https://identity.mozilla.com/apps/oldsync", "profile"];
         match account.begin_oauth_flow(&scopes, "websurferx_toolbar", "websurferx_login") {
             Ok(url) => return CString::new(url).unwrap().into_raw(),
