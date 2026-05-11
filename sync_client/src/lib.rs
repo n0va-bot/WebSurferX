@@ -50,8 +50,6 @@ fn clear_saved_state() {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn websurfery_sync_init() -> bool {
-    // Only initialize once — the PKCE flow state lives in memory
-    // and must not be destroyed by re-init during an active flow.
     if INITIALIZED.swap(true, Ordering::SeqCst) {
         return true;
     }
@@ -86,9 +84,6 @@ pub extern "C" fn websurfery_sync_init() -> bool {
 pub extern "C" fn websurfery_sync_get_auth_url() -> *mut c_char {
     let mut guard = FXA_STATE.lock().unwrap();
     if let Some(account) = guard.as_mut() {
-        // If we're disconnected (no tokens), start with a completely fresh
-        // account to avoid stale last_seen_profile or other artifacts from
-        // prior failed attempts causing "Expired Code" errors.
         if account.get_auth_state() == FxaRustAuthState::Disconnected {
             clear_saved_state();
             *account = FirefoxAccount::new(make_config());
@@ -97,7 +92,6 @@ pub extern "C" fn websurfery_sync_get_auth_url() -> *mut c_char {
         let scopes = ["https://identity.mozilla.com/apps/oldsync", "profile"];
         match account.begin_oauth_flow(&scopes, "websurfery_toolbar", "websurfery_login") {
             Ok(url) => {
-                save_fxa_state(account);
                 return CString::new(url).unwrap().into_raw();
             },
             Err(e) => println!("Rust FFI: Failed to begin OAuth flow: {:?}", e),
