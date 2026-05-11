@@ -193,12 +193,51 @@ class MenuPopover
         Button syncBtn = new Button();
         syncBtn.setIconName("view-refresh-symbolic");
         syncBtn.setTooltipText("Sync Bookmarks");
-        syncBtn.connectClicked(delegate void(Button b) { 
-            import sync.ffi : websurferx_sync_is_logged_in, websurferx_sync_bookmarks;
-            if (websurferx_sync_is_logged_in()) {
-                websurferx_sync_bookmarks();
-            } else {
-                startFxaLogin(); 
+        syncBtn.connectClicked(delegate void(Button b) {
+            import sync.ffi : websurferx_sync_is_logged_in, websurferx_sync_bookmarks, websurferx_sync_free_string;
+
+            if (websurferx_sync_is_logged_in())
+            {
+                char* result = websurferx_sync_bookmarks();
+                if (result !is null)
+                {
+                    import std.string : fromStringz;
+                    import std.json : parseJSON, JSONType;
+
+                    string jsonStr = cast(string) fromStringz(result).dup;
+                    websurferx_sync_free_string(result);
+
+                    try
+                    {
+                        auto j = parseJSON(jsonStr);
+                        if (j.type == JSONType.array)
+                        {
+                            foreach (item; j.array)
+                            {
+                                if (item.type == JSONType.object)
+                                {
+                                    if ("title" in item && "bmkUri" in item)
+                                    {
+                                        string title = item["title"].str;
+                                        string uri = item["bmkUri"].str;
+                                        storage.bookmarks.addBookmark(title, uri);
+                                    }
+                                }
+                            }
+                            updateBookmarksDropdown();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        import std.stdio : writeln;
+
+                        writeln("Failed to parse synced bookmarks: ", e.msg);
+                    }
+                }
+            }
+            else
+            {
+                startFxaLogin();
             }
         });
         headerBox.append(syncBtn);

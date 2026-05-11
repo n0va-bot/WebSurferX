@@ -130,18 +130,78 @@ pub extern "C" fn websurferx_sync_is_logged_in() -> bool {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn websurferx_sync_bookmarks() -> bool {
+pub extern "C" fn websurferx_sync_bookmarks() -> *mut c_char {
     let mut guard = FXA_STATE.lock().unwrap();
     if let Some(account) = guard.as_mut() {
-        match account.get_access_token("https://identity.mozilla.com/apps/oldsync", false) {
-            Ok(_) => {
-                println!("Rust FFI: Successfully retrieved Sync Access Token!");
-                return true;
-            },
-            Err(e) => println!("Rust FFI: Failed to get Sync token: {:?}", e),
+        if let Ok(token) = account.get_access_token("https://identity.mozilla.com/apps/oldsync", false) {
+            println!("Rust FFI: Successfully retrieved Sync Access Token!");
+            
+            if let Some(key) = token.key {
+                let token_url_str = account.get_token_server_endpoint_url().unwrap_or_default();
+                let tokenserver_url = match url::Url::parse(&token_url_str) {
+                    Ok(u) => u,
+                    Err(e) => {
+                        println!("Rust FFI: Failed to parse token server url: {:?}", e);
+                        return std::ptr::null_mut();
+                    }
+                };
+                let client_init = sync15::client::Sync15StorageClientInit {
+                    key_id: key.kid.clone(),
+                    access_token: token.token.clone(),
+                    tokenserver_url,
+                };
+                let key_bytes = key.key_bytes().unwrap_or_default();
+                let key_bundle = match sync15::KeyBundle::from_ksync_bytes(&key_bytes) {
+                    Ok(k) => k,
+                    Err(e) => {
+                        println!("Rust FFI: Failed to construct KeyBundle: {:?}", e);
+                        return std::ptr::null_mut();
+                    }
+                };
+
+                let client = match sync15::client::Sync15StorageClient::new(client_init) {
+                    Ok(c) => c,
+                    Err(e) => {
+                        println!("Rust FFI: Failed to construct StorageClient: {:?}", e);
+                        return std::ptr::null_mut();
+                    }
+                };
+
+                let req = sync15::engine::CollectionRequest::new("bookmarks".into()).full();
+                match client.get_encrypted_records(req) {
+                    Ok(sync15::client::Sync15ClientResponse::Success { record, .. }) => {
+                        let mut results = Vec::new();
+                        for bso in record {
+                            if let Ok(decrypted) = bso.into_decrypted(&key_bundle) {
+                                if let Ok(val) = serde_json::from_str::<serde_json::Value>(&decrypted.payload) {
+                                    if val.get("type").and_then(|v| v.as_str()) == Some("bookmark") {
+                                        if val.get("title").is_some() && val.get("bmkUri").is_some() {
+                                            results.push(val);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if let Ok(json) = serde_json::to_string(&results) {
+                            println!("Rust FFI: Successfully decrypted {} bookmarks", results.len());
+                            return std::ffi::CString::new(json).unwrap().into_raw();
+                        }
+                    },
+                    Ok(sync15::client::Sync15ClientResponse::Error(e)) => {
+                        println!("Rust FFI: Sync API error: {:?}", e);
+                    },
+                    Err(e) => {
+                        println!("Rust FFI: Storage client error: {:?}", e);
+                    }
+                }
+            } else {
+                println!("Rust FFI: Sync token is missing encryption key!");
+            }
+        } else {
+            println!("Rust FFI: Failed to get Sync token");
         }
     }
-    false
+    std::ptr::null_mut()
 }
 
 #[unsafe(no_mangle)]

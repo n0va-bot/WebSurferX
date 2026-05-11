@@ -1464,6 +1464,8 @@ dependencies = [
  "sync-guid",
  "thiserror 2.0.18",
  "uniffi",
+ "url",
+ "viaduct",
 ]
 
 [[package]]
@@ -1477,6 +1479,7 @@ dependencies = [
  "serde_json",
  "sync15",
  "tokio",
+ "url",
  "viaduct",
  "viaduct-hyper",
 ]
