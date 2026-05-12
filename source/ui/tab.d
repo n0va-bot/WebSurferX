@@ -535,7 +535,43 @@ class BrowserTab
             bool success = websurferx_sync_complete_login(toStringz(code), toStringz(state));
             if (success)
             {
-                websurferx_sync_bookmarks();
+                import sync.ffi : websurferx_sync_bookmarks, websurferx_sync_free_string;
+                import std.string : fromStringz;
+                import std.json : parseJSON, JSONType;
+
+                char* result = websurferx_sync_bookmarks();
+                if (result !is null)
+                {
+                    string jsonStr = cast(string) fromStringz(result).dup;
+                    websurferx_sync_free_string(result);
+
+                    try
+                    {
+                        auto j = parseJSON(jsonStr);
+                        if (j.type == JSONType.array)
+                        {
+                            import storage.bookmarks : storeBookmarks, Bookmark;
+
+                            Bookmark[] syncedBookmarks;
+                            foreach (item; j.array)
+                            {
+                                if (item.type == JSONType.object)
+                                {
+                                    if ("title" in item && "bmkUri" in item)
+                                    {
+                                        syncedBookmarks ~= Bookmark(item["title"].str, item["bmkUri"].str);
+                                    }
+                                }
+                            }
+                            storeBookmarks(syncedBookmarks);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        import std.stdio : writeln;
+                        writeln("Failed to store synced bookmarks: ", e.msg);
+                    }
+                }
             }
         }
 

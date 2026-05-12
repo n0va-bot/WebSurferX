@@ -195,6 +195,7 @@ class MenuPopover
         syncBtn.setTooltipText("Sync Bookmarks");
         syncBtn.connectClicked(delegate void(Button b) {
             import sync.ffi : websurferx_sync_is_logged_in, websurferx_sync_bookmarks, websurferx_sync_free_string;
+            import storage.bookmarks : storeBookmarks, Bookmark;
 
             if (websurferx_sync_is_logged_in())
             {
@@ -209,6 +210,7 @@ class MenuPopover
 
                     try
                     {
+                        Bookmark[] syncedBookmarks;
                         auto j = parseJSON(jsonStr);
                         if (j.type == JSONType.array)
                         {
@@ -218,14 +220,13 @@ class MenuPopover
                                 {
                                     if ("title" in item && "bmkUri" in item)
                                     {
-                                        string title = item["title"].str;
-                                        string uri = item["bmkUri"].str;
-                                        storage.bookmarks.addBookmark(title, uri);
+                                        syncedBookmarks ~= Bookmark(item["title"].str, item["bmkUri"].str);
                                     }
                                 }
                             }
-                            updateBookmarksDropdown();
                         }
+                        storeBookmarks(syncedBookmarks);
+                        updateBookmarksDropdown();
                     }
                     catch (Exception e)
                     {

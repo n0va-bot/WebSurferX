@@ -73,6 +73,13 @@ private void saveBookmarksAsync(Bookmark[] bookmarks)
     }).start();
 }
 
+void storeBookmarks(Bookmark[] bookmarks)
+{
+    cachedBookmarks = bookmarks;
+    bookmarksLoaded = true;
+    saveBookmarksAsync(bookmarks);
+}
+
 void addBookmark(string title, string uri)
 {
     auto bookmarks = loadBookmarks();
